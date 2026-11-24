@@ -2,6 +2,9 @@
 """Ship It Friday - make.fun entry.
 
 Writes a single-line git commit message to /output/entry.txt.
+
+v3: after writing, main() reads the file back as bytes and asserts they
+equal ENTRY encoded as UTF-8 exactly (no trailing newline, no extra bytes).
 """
 
 import os
@@ -41,6 +44,13 @@ def main():
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8", newline="\n") as f:
         f.write(line)
+    # v3 read-back self-verification: the bytes on disk must be exactly
+    # ENTRY encoded as UTF-8, with no trailing newline or extra bytes.
+    with open("/output/entry.txt", "rb") as f:
+        written = f.read()
+    if written != line.encode("utf-8"):
+        raise ValueError("read-back verification failed: /output/entry.txt "
+                         "does not match ENTRY exactly")
 
 
 if __name__ == "__main__":
